@@ -1,0 +1,18 @@
+services:
+  ci-watcher:
+    build: .
+    container_name: ci-watcher
+    restart: unless-stopped
+    ports:
+      - "8008:8008"
+    volumes:
+      - ci_watcher_data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/ci-builds:/tmp/ci-builds
+    environment:
+      - DATA_DIR=/data
+    env_file:
+      - .env
+
+volumes:
+  ci_watcher_data:

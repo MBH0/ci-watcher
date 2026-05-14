@@ -1,0 +1,12 @@
+{
+  "name": "ci-watcher",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/input.css -o ./app/static/css/output.css --minify",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./app/static/css/output.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "tailwindcss": "^4.1.5"
+  }
+}

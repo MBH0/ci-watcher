@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} — CI Watcher{% endblock %}
+{% block content %}
+<div class="flex items-center justify-center min-h-[60vh]">
+  <div class="text-center">
+    <div class="text-6xl font-black text-white/10 mb-4">{{ code }}</div>
+    <p class="text-f11-muted text-sm">{{ msg }}</p>
+    <a href="/" class="inline-block mt-4 text-f11-accent text-sm hover:underline">Volver al inicio</a>
+  </div>
+</div>
+{% endblock %}
