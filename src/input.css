@@ -42,3 +42,41 @@ body {
 ::selection { background: rgba(63, 255, 127, 0.15); }
 
 pre, code { font-family: var(--font-mono); }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: var(--color-f11-accent); color: #000;
+  padding: 0.625rem 1.25rem; border-radius: 0.75rem;
+  font-weight: 600; font-size: 0.875rem;
+  transition: all 0.15s;
+}
+.btn-primary:hover { background: color-mix(in srgb, var(--color-f11-accent) 90%, transparent); }
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: rgba(255,255,255,0.04); color: var(--color-f11-dim);
+  padding: 0.5rem 1rem; border-radius: 0.75rem;
+  font-weight: 500; font-size: 0.875rem;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.15s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+.card {
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 1rem; transition: all 0.2s;
+}
+.card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12); }
+
+.card-solid {
+  background: var(--color-f11-card); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 1rem;
+}
+
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 0.25rem 0.625rem; border-radius: 999px;
+  font-size: 0.625rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

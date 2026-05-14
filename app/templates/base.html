@@ -8,42 +8,41 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/output.css">
 </head>
-<body class="bg-f11-bg min-h-screen flex">
+<body class="bg-f11-bg min-h-screen flex antialiased">
   {% if user %}
-  <!-- Sidebar -->
-  <aside class="w-60 border-r border-f11-border flex flex-col shrink-0 bg-f11-card">
-    <div class="h-14 flex items-center gap-2.5 px-5 border-b border-f11-border">
-      <div class="w-7 h-7 rounded-lg bg-f11-accent flex items-center justify-center">
-        <span class="text-black font-black text-xs">C</span>
+  <aside class="w-64 border-r border-white/[0.06] flex flex-col shrink-0 bg-f11-card/50 backdrop-blur-sm">
+    <div class="h-16 flex items-center gap-3 px-6 border-b border-white/[0.06]">
+      <div class="w-8 h-8 rounded-xl bg-f11-accent/20 flex items-center justify-center border border-f11-accent/20">
+        <span class="text-f11-accent font-black text-sm">C</span>
       </div>
-      <span class="text-white font-bold text-sm">CI Watcher</span>
+      <div>
+        <span class="text-white font-bold text-sm tracking-tight">CI Watcher</span>
+        <span class="text-f11-muted/50 text-[10px] block leading-none mt-0.5">Build Monitor</span>
+      </div>
     </div>
     <nav class="flex-1 p-3 space-y-1">
-      <a href="/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-        {% if request.url.path == '/' or request.url.path.startswith('/builds') %}bg-white/10 text-white{% else %}text-f11-dim hover:text-white hover:bg-white/5{% endif %}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      <a href="/" class="sidebar-link {% if request.url.path == '/' or request.url.path.startswith('/builds') %}active{% endif %}">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
         Builds
       </a>
-      <a href="/repos" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-        {% if request.url.path == '/repos' %}bg-white/10 text-white{% else %}text-f11-dim hover:text-white hover:bg-white/5{% endif %}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <a href="/repos" class="sidebar-link {% if request.url.path == '/repos' %}active{% endif %}">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         Repos
       </a>
-      <a href="/settings" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-        {% if request.url.path == '/settings' %}bg-white/10 text-white{% else %}text-f11-dim hover:text-white hover:bg-white/5{% endif %}">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <a href="/settings" class="sidebar-link {% if request.url.path == '/settings' %}active{% endif %}">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Ajustes
       </a>
     </nav>
-    <div class="p-3 border-t border-f11-border">
-      <div class="flex items-center gap-3 px-3 py-2">
-        <img src="{{ user.avatar }}" alt="" class="w-7 h-7 rounded-full" onerror="this.style.display='none'">
+    <div class="p-4 border-t border-white/[0.06]">
+      <div class="flex items-center gap-3">
+        <img src="{{ user.avatar }}" alt="" class="w-8 h-8 rounded-full ring-2 ring-white/[0.06]" onerror="this.style.display='none'">
         <div class="min-w-0">
-          <p class="text-white text-xs font-medium truncate">{{ user.name or user.login }}</p>
-          <p class="text-f11-muted text-[10px] truncate">@{{ user.login }}</p>
+          <p class="text-white text-xs font-medium truncate leading-none mb-1">{{ user.name or user.login }}</p>
+          <p class="text-f11-muted/50 text-[10px] truncate">@{{ user.login }}</p>
         </div>
-        <a href="/auth/logout" class="ml-auto text-f11-muted hover:text-white transition-colors" title="Cerrar sesión">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <a href="/auth/logout" class="ml-auto p-2 rounded-lg text-f11-muted/40 hover:text-f11-dim hover:bg-white/5 transition-all" title="Cerrar sesión">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </a>
       </div>
     </div>

@@ -1,45 +1,48 @@
 {% extends "base.html" %}
 {% block title %}Repos — CI Watcher{% endblock %}
 {% block content %}
-<div class="p-8">
-  <div class="max-w-5xl mx-auto">
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold text-white">Repositorios</h1>
-      <p class="text-f11-dim text-sm mt-1">Activa el webhook para recibir builds automáticos con cada push.</p>
+<div class="p-10 lg:p-12">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex items-center justify-between mb-10">
+      <div>
+        <h1 class="text-3xl font-bold text-white tracking-tight">Repositorios</h1>
+        <p class="text-f11-dim text-sm mt-1.5">Activa el webhook para recibir builds automáticos con cada push.</p>
+      </div>
     </div>
 
-    <div class="space-y-2">
+    <div class="grid grid-cols-1 gap-3">
       {% for repo in repos %}
       {% set full = repo.full_name %}
       {% set is_active = full in configured_repos %}
-      <div class="bg-white/[0.03] border border-white/[0.06] rounded-xl px-5 py-4 flex items-center justify-between hover:border-white/[0.12] transition-colors">
+      <div class="card hover:!bg-white/[0.04] p-5 flex items-center justify-between">
         <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2">
-            <span class="text-white font-medium text-sm truncate">{{ full }}</span>
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-f11-muted/30 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span class="text-white font-medium text-sm">{{ full }}</span>
             {% if repo.private %}
-            <svg class="text-f11-muted shrink-0" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <svg class="w-3.5 h-3.5 text-f11-muted/30" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
             {% endif %}
             {% if is_active %}
-            <span class="text-[10px] bg-f11-success/10 text-f11-success px-2 py-0.5 rounded-full font-medium">Webhook activo</span>
+            <span class="badge bg-f11-success/10 text-f11-success border border-f11-success/10">Webhook activo</span>
             {% endif %}
           </div>
           {% if repo.description %}
-          <p class="text-xs text-f11-muted mt-0.5 truncate">{{ repo.description }}</p>
+          <p class="text-xs text-f11-muted/40 mt-1.5 truncate max-w-xl">{{ repo.description }}</p>
           {% endif %}
         </div>
-        <div class="flex items-center gap-3 shrink-0 ml-4">
+        <div class="flex items-center gap-4 shrink-0 ml-6">
           {% if repo.language %}
-          <span class="text-[10px] text-f11-muted bg-white/[0.04] px-2 py-1 rounded">{{ repo.language }}</span>
+          <span class="text-[10px] text-f11-muted/30 bg-white/[0.03] px-2.5 py-1.5 rounded-lg font-medium">{{ repo.language }}</span>
           {% endif %}
           {% if is_active %}
           <form method="POST" action="/repos/deactivate">
             <input type="hidden" name="repo" value="{{ full }}">
-            <button class="text-xs text-f11-muted hover:text-f11-danger px-3 py-1.5 rounded-lg hover:bg-f11-danger/10 transition-colors font-medium">Desactivar</button>
+            <button class="text-xs text-f11-muted/40 hover:text-f11-danger px-4 py-2 rounded-xl hover:bg-f11-danger/5 transition-all font-medium">Desactivar</button>
           </form>
           {% else %}
           <form method="POST" action="/repos/activate">
             <input type="hidden" name="repo" value="{{ full }}">
-            <button class="text-xs bg-f11-accent text-black px-4 py-1.5 rounded-lg font-semibold hover:bg-f11-accent/90 transition-all active:scale-[0.97]">Activar</button>
+            <button class="btn-primary text-xs !px-5 !py-2.5">Activar</button>
           </form>
           {% endif %}
         </div>
@@ -48,10 +51,12 @@
     </div>
 
     {% if not repos %}
-    <div class="flex flex-col items-center justify-center py-24">
-      <svg class="w-16 h-16 text-f11-muted/20 mb-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+    <div class="flex flex-col items-center justify-center py-32">
+      <div class="w-20 h-20 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-8">
+        <svg class="w-10 h-10 text-white/[0.12]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </div>
       <p class="text-f11-muted text-sm">No se pudieron cargar los repositorios. Intenta reconectarte.</p>
-      <a href="/auth/github" class="mt-4 bg-white/10 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-white/20 transition-colors">Reconectar</a>
+      <a href="/auth/github" class="mt-6 btn-ghost">Reconectar</a>
     </div>
     {% endif %}
   </div>

@@ -1,94 +1,100 @@
 {% extends "base.html" %}
 {% block title %}Builds — CI Watcher{% endblock %}
 {% block content %}
-<div class="p-8">
-  <div class="max-w-5xl mx-auto">
+<div class="p-10 lg:p-12">
+  <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-8">
+    <div class="flex items-center justify-between mb-10">
       <div>
-        <h1 class="text-2xl font-bold text-white">Builds</h1>
-        <p class="text-f11-dim text-sm mt-1">{{ total_builds }} ejecuciones en total</p>
+        <h1 class="text-3xl font-bold text-white tracking-tight">Builds</h1>
+        <p class="text-f11-dim text-sm mt-1.5">{{ total_builds }} ejecuciones en total</p>
       </div>
-      <a href="/repos" class="inline-flex items-center gap-2 bg-f11-accent text-black px-4 py-2 rounded-lg font-semibold text-sm hover:bg-f11-accent/90 transition-all active:scale-[0.97]">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <a href="/repos" class="btn-primary">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add Repo
       </a>
     </div>
 
     {% if not builds %}
     <!-- Empty state -->
-    <div class="flex flex-col items-center justify-center py-24">
-      <svg class="w-16 h-16 text-f11-muted/20 mb-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-      <h2 class="text-lg font-semibold text-white mb-2">No builds yet</h2>
-      <p class="text-f11-muted text-sm text-center max-w-sm">Conecta un repositorio desde Repos y recibe builds automáticos en cada push.</p>
-      <a href="/repos" class="mt-6 bg-white/10 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-white/20 transition-colors">Ir a Repos</a>
+    <div class="flex flex-col items-center justify-center py-32">
+      <div class="w-20 h-20 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-8">
+        <svg class="w-10 h-10 text-white/[0.12]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      </div>
+      <h2 class="text-xl font-semibold text-white mb-2">No builds yet</h2>
+      <p class="text-f11-muted text-sm text-center max-w-md leading-relaxed">Conecta un repositorio desde la sección Repos y recibe builds automáticos en cada push. Los logs se ven en tiempo real con SSE.</p>
+      <a href="/repos" class="mt-8 btn-ghost">Ir a Repos</a>
     </div>
     {% else %}
-    <!-- Stats -->
+    <!-- Stats cards -->
     {% set ns = namespace(success=0, failed=0, running=0) %}
     {% for b in builds %}
       {% if b.status == 'success' %}{% set ns.success = ns.success + 1 %}{% endif %}
       {% if b.status == 'failed' %}{% set ns.failed = ns.failed + 1 %}{% endif %}
       {% if b.status == 'running' %}{% set ns.running = ns.running + 1 %}{% endif %}
     {% endfor %}
-    <div class="grid grid-cols-4 gap-4 mb-8">
-      <div class="bg-f11-card rounded-xl p-4 border border-f11-border">
-        <p class="text-f11-muted text-xs uppercase tracking-wider font-medium mb-1">Total</p>
-        <p class="text-white text-2xl font-bold">{{ builds|length }}</p>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+      <div class="card-solid p-6">
+        <p class="text-f11-muted/50 text-xs uppercase tracking-widest font-semibold mb-2">Total</p>
+        <p class="text-white text-3xl font-bold">{{ builds|length }}</p>
       </div>
-      <div class="bg-f11-card rounded-xl p-4 border border-f11-border">
-        <p class="text-f11-muted text-xs uppercase tracking-wider font-medium mb-1">Exitosos</p>
-        <p class="text-f11-success text-2xl font-bold">{{ ns.success }}</p>
+      <div class="card-solid p-6">
+        <p class="text-f11-muted/50 text-xs uppercase tracking-widest font-semibold mb-2">Exitosos</p>
+        <p class="text-f11-success text-3xl font-bold">{{ ns.success }}</p>
       </div>
-      <div class="bg-f11-card rounded-xl p-4 border border-f11-border">
-        <p class="text-f11-muted text-xs uppercase tracking-wider font-medium mb-1">Fallidos</p>
-        <p class="text-f11-danger text-2xl font-bold">{{ ns.failed }}</p>
+      <div class="card-solid p-6">
+        <p class="text-f11-muted/50 text-xs uppercase tracking-widest font-semibold mb-2">Fallidos</p>
+        <p class="text-f11-danger text-3xl font-bold">{{ ns.failed }}</p>
       </div>
-      <div class="bg-f11-card rounded-xl p-4 border border-f11-border">
-        <p class="text-f11-muted text-xs uppercase tracking-wider font-medium mb-1">En curso</p>
-        <p class="text-f11-warning text-2xl font-bold">{{ ns.running }}</p>
+      <div class="card-solid p-6">
+        <p class="text-f11-muted/50 text-xs uppercase tracking-widest font-semibold mb-2">En curso</p>
+        <p class="text-f11-warning text-3xl font-bold">{{ ns.running }}</p>
       </div>
     </div>
 
     <!-- Builds list -->
-    <div class="space-y-2">
+    <div class="space-y-3">
       {% for b in builds %}
-      <a href="/builds/{{ b.id }}" class="block bg-white/[0.03] border border-white/[0.06] rounded-xl hover:bg-white/[0.06] hover:border-white/[0.12] transition-all group">
-        <div class="flex items-center gap-4 px-5 py-4">
-          <div class="w-9 h-9 rounded-lg flex items-center justify-center shrink-0
+      <a href="/builds/{{ b.id }}" class="card block group">
+        <div class="flex items-center gap-5 p-5">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0
             {% if b.status == 'success' %}bg-f11-success/10 text-f11-success
             {% elif b.status == 'failed' %}bg-f11-danger/10 text-f11-danger
             {% elif b.status == 'running' %}bg-f11-warning/10 text-f11-warning
             {% else %}bg-white/5 text-f11-muted{% endif %}">
             {% if b.status == 'success' %}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
             {% elif b.status == 'failed' %}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             {% elif b.status == 'running' %}
-            <div class="w-4 h-4 border-2 border-f11-warning border-t-transparent rounded-full animate-spin"></div>
+            <div class="w-5 h-5 border-2 border-f11-warning border-t-transparent rounded-full animate-spin"></div>
             {% else %}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             {% endif %}
           </div>
           <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-2">
-              <span class="text-white font-medium text-sm truncate">{{ b.repo }}</span>
-              <span class="text-f11-muted/50 text-xs font-mono bg-white/[0.04] px-1.5 py-0.5 rounded">{{ b.commit_sha[:7] }}</span>
+            <div class="flex items-center gap-3">
+              <span class="text-white font-medium text-sm truncate group-hover:text-f11-accent transition-colors">{{ b.repo }}</span>
+              <span class="text-f11-muted/30 text-xs font-mono bg-white/[0.03] px-2 py-0.5 rounded-md shrink-0">{{ b.commit_sha[:7] }}</span>
             </div>
-            <div class="flex items-center gap-2 text-xs text-f11-muted mt-0.5">
+            <div class="flex items-center gap-3 text-xs text-f11-muted/50 mt-1.5">
               <span>{{ b.branch }}</span>
-              {% if b.author %}<span>· {{ b.author }}</span>{% endif %}
-              {% if b.commit_msg %}<span class="truncate max-w-[300px]">· {{ b.commit_msg.strip()[:60] }}</span>{% endif %}
+              {% if b.author %}<span class="w-1 h-1 rounded-full bg-f11-muted/20"></span><span>{{ b.author }}</span>{% endif %}
+              {% if b.commit_msg %}<span class="w-1 h-1 rounded-full bg-f11-muted/20"></span><span class="truncate max-w-[400px]">{{ b.commit_msg.strip()[:80] }}</span>{% endif %}
             </div>
           </div>
-          <div class="text-right shrink-0">
-            <div class="text-xs font-medium {% if b.status == 'success' %}text-f11-success{% elif b.status == 'failed' %}text-f11-danger{% elif b.status == 'running' %}text-f11-warning{% else %}text-f11-muted{% endif %}">
+          <div class="text-right shrink-0 pl-4">
+            <div class="text-xs font-semibold tracking-wide
+              {% if b.status == 'success' %}text-f11-success
+              {% elif b.status == 'failed' %}text-f11-danger
+              {% elif b.status == 'running' %}text-f11-warning
+              {% else %}text-f11-muted/50{% endif %}">
               {{ b.status }}
             </div>
             {% if b.finished_at %}
-            <div class="text-[10px] text-f11-muted/50 mt-0.5">{{ b.finished_at.strftime('%d/%m %H:%M') }}</div>
+            <div class="text-[10px] text-f11-muted/30 mt-1.5">{{ b.finished_at.strftime('%d/%m %H:%M') }}</div>
             {% elif b.started_at %}
-            <div class="text-[10px] text-f11-muted/50 mt-0.5">{{ b.started_at.strftime('%H:%M') }}</div>
+            <div class="text-[10px] text-f11-muted/30 mt-1.5">{{ b.started_at.strftime('%H:%M') }}</div>
             {% endif %}
           </div>
         </div>
@@ -98,13 +104,13 @@
 
     <!-- Pagination -->
     {% if total_pages > 1 %}
-    <div class="flex items-center justify-center gap-2 mt-8">
+    <div class="flex items-center justify-center gap-3 mt-10">
       {% if page > 1 %}
-      <a href="/?page={{ page-1 }}" class="px-3 py-1.5 rounded-lg text-sm text-f11-dim hover:text-white hover:bg-white/10 transition-colors">← Anterior</a>
+      <a href="/?page={{ page-1 }}" class="btn-ghost px-4 py-2">← Anterior</a>
       {% endif %}
-      <span class="text-sm text-f11-muted">Página {{ page }} de {{ total_pages }}</span>
+      <span class="text-sm text-f11-muted/50 px-3">Página {{ page }} de {{ total_pages }}</span>
       {% if page < total_pages %}
-      <a href="/?page={{ page+1 }}" class="px-3 py-1.5 rounded-lg text-sm text-f11-dim hover:text-white hover:bg-white/10 transition-colors">Siguiente →</a>
+      <a href="/?page={{ page+1 }}" class="btn-ghost px-4 py-2">Siguiente →</a>
       {% endif %}
     </div>
     {% endif %}
@@ -112,52 +118,23 @@
   </div>
 </div>
 
-  </div>
-</div>
-
 <script>
-// SSE — recibe builds en vivo
 (function() {
   var evtSource = new EventSource('/api/events');
-
   evtSource.addEventListener('build_created', function(e) {
-    try {
-      var d = JSON.parse(e.data);
-      console.log('⚡ Build creado:', d.repo, d.status);
-      reloadSoon();
-    } catch(e) {}
+    try { console.log('⚡ Build creado:', JSON.parse(e.data).repo); reloadSoon(); } catch(e) {}
   });
-
   evtSource.addEventListener('build_started', function(e) {
-    try {
-      var d = JSON.parse(e.data);
-      console.log('⚡ Build iniciado:', d.repo);
-      reloadSoon();
-    } catch(e) {}
+    try { console.log('⚡ Build iniciado:', JSON.parse(e.data).repo); reloadSoon(); } catch(e) {}
   });
-
   evtSource.addEventListener('build_updated', function(e) {
-    try {
-      var d = JSON.parse(e.data);
-      console.log('⚡ Build finalizado:', d.repo, d.status);
-      reloadSoon();
-    } catch(e) {}
+    try { console.log('⚡ Build finalizado:', JSON.parse(e.data).repo); reloadSoon(); } catch(e) {}
   });
-
-  evtSource.onerror = function() {
-    console.log('SSE error, reintentando...');
-  };
+  evtSource.onerror = function() { console.log('SSE reconectando...'); };
 })();
-
-function reloadSoon() {
-  setTimeout(function() { location.reload(); }, 1500);
-}
-
-// Fallback: polling cada 10s si hay builds corriendo
+function reloadSoon() { setTimeout(function() { location.reload(); }, 1500); }
 {% if ns.running > 0 %}
-(function() {
-  setTimeout(reloadSoon, 10000);
-})();
+setTimeout(reloadSoon, 10000);
 {% endif %}
 </script>
 {% endblock %}

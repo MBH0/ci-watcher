@@ -1,68 +1,80 @@
 {% extends "base.html" %}
 {% block title %}{{ build.repo }} — CI Watcher{% endblock %}
 {% block content %}
-<div class="p-8">
-  <div class="max-w-5xl mx-auto">
-    <a href="/" class="inline-flex items-center gap-1.5 text-f11-muted hover:text-white transition-colors mb-6 text-sm">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+<div class="p-10 lg:p-12">
+  <div class="max-w-6xl mx-auto">
+    <a href="/" class="inline-flex items-center gap-2 text-f11-muted/40 hover:text-f11-dim transition-colors mb-8 text-sm font-medium">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
       Volver
     </a>
 
     <!-- Build header -->
-    <div class="flex items-start gap-5 mb-8">
-      <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0
+    <div class="flex items-start gap-6 mb-10">
+      <div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0
         {% if build.status == 'success' %}bg-f11-success/10 text-f11-success
         {% elif build.status == 'failed' %}bg-f11-danger/10 text-f11-danger
         {% elif build.status == 'running' %}bg-f11-warning/10 text-f11-warning
         {% else %}bg-white/5 text-f11-muted{% endif %}">
         {% if build.status == 'success' %}
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
         {% elif build.status == 'failed' %}
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         {% elif build.status == 'running' %}
-        <div class="w-6 h-6 border-2 border-f11-warning border-t-transparent rounded-full animate-spin"></div>
+        <div class="w-7 h-7 border-[3px] border-f11-warning border-t-transparent rounded-full animate-spin"></div>
         {% else %}
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         {% endif %}
       </div>
       <div class="min-w-0 flex-1">
-        <h1 class="text-xl font-bold text-white">{{ build.repo }}</h1>
-        <div class="flex flex-wrap items-center gap-3 text-sm text-f11-muted mt-1.5">
-          <span class="font-mono text-xs bg-white/[0.04] px-1.5 py-0.5 rounded">{{ build.commit_sha[:7] }}</span>
-          <span>{{ build.branch }}</span>
-          {% if build.author %}<span>· {{ build.author }}</span>{% endif %}
-          {% if build.triggered_by %}<span>· via {{ build.triggered_by }}</span>{% endif %}
+        <div class="flex items-center gap-3 mb-2">
+          <h1 class="text-2xl font-bold text-white tracking-tight">{{ build.repo }}</h1>
+          <span class="text-f11-muted/30 text-xs font-mono bg-white/[0.03] px-2.5 py-1 rounded-md">{{ build.commit_sha[:7] }}</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-4 text-sm text-f11-muted/50">
+          <span class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><polyline points="9 15 12 12 15 15"/></svg>
+            {{ build.branch }}
+          </span>
+          {% if build.author %}
+          <span class="flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            {{ build.author }}
+          </span>
+          {% endif %}
+          {% if build.triggered_by %}
+          <span>via {{ build.triggered_by }}</span>
+          {% endif %}
         </div>
         {% if build.commit_msg %}
-        <p class="text-sm text-f11-muted/70 mt-2 max-w-2xl">{{ build.commit_msg.strip() }}</p>
+        <p class="text-sm text-f11-muted/60 mt-3 max-w-2xl leading-relaxed border-l-2 border-white/[0.06] pl-4">{{ build.commit_msg.strip() }}</p>
         {% endif %}
-        <div class="flex items-center gap-4 mt-3 text-xs text-f11-muted">
+        <div class="flex items-center gap-6 mt-4 text-xs text-f11-muted/40">
           {% if build.started_at %}
           <span>Inicio: {{ build.started_at.strftime('%d/%m/%Y %H:%M:%S') }}</span>
           {% endif %}
           {% if build.finished_at %}
           <span>Fin: {{ build.finished_at.strftime('%H:%M:%S') }}</span>
-          <span>Duración: {{ (build.finished_at - build.started_at).total_seconds()|round(1) }}s</span>
+          <span class="text-f11-dim/60">Duración: {{ (build.finished_at - build.started_at).total_seconds()|round(1) }}s</span>
           {% endif %}
         </div>
       </div>
     </div>
 
     <!-- Build log -->
-    <div class="bg-f11-card border border-f11-border rounded-xl overflow-hidden">
-      <div class="flex items-center justify-between px-5 py-3 border-b border-f11-border">
-        <div class="flex items-center gap-2">
-          <span class="text-xs text-f11-muted uppercase tracking-wider font-medium">Build Log</span>
+    <div class="card-solid overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+        <div class="flex items-center gap-3">
+          <span class="text-xs text-f11-muted/50 uppercase tracking-widest font-semibold">Build Log</span>
           {% if build.status == 'running' %}
-          <span class="flex items-center gap-1.5 text-[10px] text-f11-warning animate-pulse-slow">
-            <span class="w-1.5 h-1.5 rounded-full bg-f11-warning"></span>
+          <span class="flex items-center gap-1.5 text-[10px] text-f11-warning">
+            <span class="w-1.5 h-1.5 rounded-full bg-f11-warning animate-pulse"></span>
             En vivo
           </span>
           {% endif %}
         </div>
-        <span class="text-[10px] text-f11-muted/50">Build #{{ build.id }}</span>
+        <span class="text-[10px] text-f11-muted/30 font-mono">#{{ build.id }}</span>
       </div>
-      <pre id="build-log" class="p-5 text-sm font-mono text-f11-dim overflow-auto max-h-[70vh] leading-relaxed whitespace-pre-wrap">{% if build.log %}{{ build.log }}{% else %}⏳ Esperando inicio del build...{% endif %}</pre>
+      <pre id="build-log" class="p-6 text-sm font-mono text-f11-dim/80 overflow-auto max-h-[75vh] leading-[1.7] whitespace-pre-wrap" style="tab-size:2">{% if build.log %}{{ build.log }}{% else %}<span class="text-f11-muted/30">⏳ Esperando inicio del build...</span>{% endif %}</pre>
     </div>
   </div>
 </div>
