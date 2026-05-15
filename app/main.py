@@ -512,9 +512,7 @@ async def index(request: Request):
 @app.get("/repos", response_class=HTMLResponse)
 async def repos_page(request: Request):
     user = _user_context(request)
-    repos_data = await gh_api(user, "GET", "/user/repos?sort=updated&per_page=100&type=owner")
-    if repos_data is None:
-        repos_data = await gh_api(user, "GET", "/user/repos?sort=updated&per_page=100")
+    repos_data = await gh_api(user, "GET", "/user/repos?sort=updated&per_page=100&affiliation=owner,organization_member")
     repos_list = repos_data or []
 
     with db() as session:
