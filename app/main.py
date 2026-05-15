@@ -657,8 +657,8 @@ async def cancel_build(build_id: int):
         build = session.get(Build, build_id)
         if not build:
             raise HTTPException(404, "Build not found")
-        if build.status != "running":
-            return {"status": "error", "msg": "Build is not running"}
+        if build.status not in ("running", "pending"):
+            return {"status": "error", "msg": "Build is not running or queued"}
         # Extract values before session closes
         repo = build.repo
         sha = build.commit_sha[:7]
