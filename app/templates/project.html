@@ -111,9 +111,7 @@
           <div class="col-span-1 flex items-center gap-2 justify-end">
             <a href="/builds/{{ b.id }}" class="text-[10px] text-f11-muted/30 hover:text-f11-dim transition-colors font-medium">Ver</a>
             {% if b.status == 'running' %}
-            <form method="POST" action="/api/builds/{{ b.id }}/cancel" onsubmit="return confirm('¿Cancelar este build?')">
-              <button class="text-[10px] text-f11-danger/60 hover:text-f11-danger transition-colors font-medium">Cancelar</button>
-            </form>
+            <button onclick="cancelBuild({{ b.id }}, this)" class="text-[10px] text-f11-danger/60 hover:text-f11-danger transition-colors font-medium">Cancelar</button>
             {% endif %}
           </div>
         </div>
@@ -125,15 +123,39 @@
 </div>
 
 <script>
-(function() {
-  var evtSource = new EventSource('/api/events');
-  evtSource.addEventListener('build_created', function(e) { setTimeout(function() { location.reload(); }, 2000); });
-  evtSource.addEventListener('build_started', function(e) { setTimeout(function() { location.reload(); }, 2000); });
-  evtSource.addEventListener('build_updated', function(e) { setTimeout(function() { location.reload(); }, 2000); });
-  evtSource.onerror = function() {};
-})();
-{% if running_builds %}
-setTimeout(function() { location.reload(); }, 8000);
-{% endif %}
+async function cancelBuild(id, btn) {
+  if (!confirm('¿Cancelar este build?')) return;
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    var r = await fetch('/api/builds/' + id + '/cancel', { method: 'POST' });
+    var d = await r.json();
+    if (d.status === 'cancelled' || d.status === 'ok') {
+      showToastMsg('Build cancelado', 'success');
+      setTimeout(function() { location.reload(); }, 1000);
+    } else {
+      showToastMsg(d.msg || 'No se pudo cancelar', 'failed');
+      btn.disabled = false;
+      btn.textContent = 'Cancelar';
+    }
+  } catch(e) {
+    showToastMsg('Error al cancelar', 'failed');
+    btn.disabled = false;
+    btn.textContent = 'Cancelar';
+  }
+}
+function showToastMsg(msg, type) {
+  var c = document.getElementById('toast-container');
+  if (!c) return;
+  var colors = { success: 'bg-f11-success/10 border-f11-success/20 text-f11-success', failed: 'bg-f11-danger/10 border-f11-danger/20 text-f11-danger' };
+  var t = document.createElement('div');
+  t.className = 'pointer-events-auto flex items-center gap-3 px-5 py-3.5 rounded-xl border shadow-lg backdrop-blur-md transition-all duration-300 ' + (colors[type] || colors.failed);
+  t.style.transform = 'translateX(120%)';
+  t.innerHTML = '<span class="text-sm font-bold">' + (type === 'success' ? '✓' : '✗') + '</span><div><p class="text-xs font-semibold">' + msg + '</p></div>';
+  c.appendChild(t);
+  requestAnimationFrame(function() { t.style.transform = 'translateX(0)'; });
+  setTimeout(function() { t.style.transform = 'translateX(120%)'; }, 3500);
+  setTimeout(function() { t.remove(); }, 4000);
+}
 </script>
 {% endblock %}

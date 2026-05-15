@@ -658,7 +658,15 @@ async def cancel_build(build_id: int):
         if not build:
             raise HTTPException(404, "Build not found")
         if build.status not in ("running", "pending"):
-            return {"status": "error", "msg": "Build is not running or queued"}
+            return {"status": "error", "msg": f"Build ya está {build.status} (no se puede cancelar)"}
+        # Extract values before session closes
+        repo = build.repo
+        sha = build.commit_sha[:7]
+        finished = datetime.now(timezone.utc)
+        build.status = "failed"
+        build.finished_at = finished
+        build.log += f"\n[{finished.strftime('%H:%M:%S')}] 🛑 Build cancelled by user\n"
+        session.commit()
         # Extract values before session closes
         repo = build.repo
         sha = build.commit_sha[:7]
