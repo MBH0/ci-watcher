@@ -214,7 +214,7 @@ async def auth_callback(code: str, response: Response):
         "access_token": at,
     })
     resp = RedirectResponse(url="/")
-    resp.set_cookie("session", session_token, httponly=True, max_age=604800, samesite="lax", secure="ngrok" in HOST_URL)
+    resp.set_cookie("session", session_token, httponly=True, max_age=604800, samesite="lax", secure=HOST_URL.startswith("https://"))
     return resp
 
 @app.get("/auth/logout")
