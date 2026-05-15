@@ -49,19 +49,18 @@
     <!-- Project groups -->
     <div class="space-y-6">
       {% for repo, builds in grouped.items() %}
-      {% set last = builds[0] %}
       {% set repo_short = repo.split('/')[-1] %}
-      {% set bg = repo.split('/')[0] %}
       <div class="card-solid overflow-hidden">
-        <!-- Repo header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] hover:bg-white/[0.02] transition-colors">
+        <!-- Repo header (clickable → project page) -->
+        <a href="/projects/{{ repo }}" class="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] hover:bg-white/[0.02] transition-colors group">
           <div class="flex items-center gap-4 min-w-0">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-f11-accent/10">
               <span class="text-f11-accent text-sm font-bold">{{ repo_short[0].upper() }}</span>
             </div>
             <div class="min-w-0">
               <div class="flex items-center gap-3">
-                <span class="text-white font-semibold text-sm">{{ repo }}</span>
+                <span class="text-white font-semibold text-sm group-hover:text-f11-accent transition-colors">{{ repo_short }}</span>
+                <span class="text-f11-muted/30 text-[10px]">/{{ repo.split('/')[0] }}</span>
                 {% if repo in configured_repos %}
                 <span class="badge bg-f11-success/10 text-f11-success border border-f11-success/10 text-[9px]">activo</span>
                 {% endif %}
@@ -82,8 +81,9 @@
             {% set status_color = 'text-f11-success' if last.status == 'success' else 'text-f11-danger' if last.status == 'failed' else 'text-f11-warning' if last.status == 'running' else 'text-f11-muted/50' %}
             <span class="text-xs font-semibold {{ status_color }}">{{ last.status }}</span>
             <span class="text-[10px] text-f11-muted/30 font-mono">{{ last.commit_sha[:7] }}</span>
+            <svg class="w-4 h-4 text-f11-muted/20 group-hover:text-f11-muted/50 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
-        </div>
+        </a>
 
         <!-- Build list for this repo -->
         <div class="divide-y divide-white/[0.03]">
@@ -119,8 +119,13 @@
         </div>
 
         {% if builds|length > 10 %}
-        <div class="px-6 py-3 border-t border-white/[0.03]">
+        <div class="px-6 py-3 border-t border-white/[0.03] flex items-center justify-between">
           <span class="text-[10px] text-f11-muted/30">+{{ builds|length - 10 }} builds más</span>
+          <a href="/projects/{{ repo }}" class="text-[10px] text-f11-accent/60 hover:text-f11-accent transition-colors font-medium">Ver todos →</a>
+        </div>
+        {% else %}
+        <div class="px-6 py-3 border-t border-white/[0.03] text-right">
+          <a href="/projects/{{ repo }}" class="text-[10px] text-f11-accent/60 hover:text-f11-accent transition-colors font-medium">Ver todos →</a>
         </div>
         {% endif %}
       </div>

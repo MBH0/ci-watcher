@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}{{ repo }} — CI Watcher{% endblock %}
+{% block content %}
+<div class="p-10 lg:p-12">
+  <div class="max-w-6xl mx-auto">
+    <a href="/" class="inline-flex items-center gap-2 text-f11-muted/40 hover:text-f11-dim transition-colors mb-8 text-sm font-medium">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Volver
+    </a>
+
+    <!-- Project header -->
+    <div class="flex items-start justify-between mb-10">
+      <div class="flex items-start gap-5">
+        <div class="w-14 h-14 rounded-2xl bg-f11-accent/10 border border-f11-accent/10 flex items-center justify-center shrink-0">
+          <span class="text-f11-accent text-xl font-bold">{{ repo.split('/')[-1][0].upper() }}</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-3 mb-1">
+            <h1 class="text-2xl font-bold text-white tracking-tight">{{ repo }}</h1>
+            {% if is_active %}
+            <span class="badge bg-f11-success/10 text-f11-success border border-f11-success/10">activo</span>
+            {% endif %}
+          </div>
+          <p class="text-f11-dim text-sm">{{ total }} builds en total</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        {% if running_builds %}
+        <span class="flex items-center gap-2 text-xs text-f11-warning bg-f11-warning/10 px-3 py-2 rounded-lg font-medium">
+          <span class="w-2 h-2 rounded-full bg-f11-warning animate-pulse"></span>
+          {{ running_builds|length }} en ejecución
+        </span>
+        {% endif %}
+        <form method="POST" action="/api/builds/trigger">
+          <input type="hidden" name="repo" value="{{ repo }}">
+          <input type="hidden" name="branch" value="main">
+          <button type="submit" class="btn-primary text-xs !px-4 !py-2.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Build manual
+          </button>
+        </form>
+      </div>
+    </div>
+
+    {% if not builds %}
+    <div class="flex flex-col items-center justify-center py-32">
+      <p class="text-f11-muted text-sm">No hay builds para este proyecto aún.</p>
+    </div>
+    {% else %}
+    <!-- Builds list -->
+    <div class="card-solid overflow-hidden">
+      <div class="grid grid-cols-12 gap-4 px-6 py-3 border-b border-white/[0.06] text-[10px] text-f11-muted/30 uppercase tracking-widest font-semibold">
+        <div class="col-span-1"></div>
+        <div class="col-span-2">Commit</div>
+        <div class="col-span-2">Branch</div>
+        <div class="col-span-4">Mensaje</div>
+        <div class="col-span-1">Estado</div>
+        <div class="col-span-1">Duración</div>
+        <div class="col-span-1"></div>
+      </div>
+
+      <div class="divide-y divide-white/[0.03]">
+        {% for b in builds %}
+        <div class="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-white/[0.02] transition-colors group">
+          <!-- Status dot -->
+          <div class="col-span-1 flex items-center">
+            <div class="w-2.5 h-2.5 rounded-full shrink-0
+              {% if b.status == 'success' %}bg-f11-success
+              {% elif b.status == 'failed' %}bg-f11-danger
+              {% elif b.status == 'running' %}bg-f11-warning animate-pulse
+              {% else %}bg-f11-muted/30{% endif %}">
+            </div>
+          </div>
+
+          <!-- Commit -->
+          <div class="col-span-2">
+            <span class="text-xs font-mono text-f11-dim/70">{{ b.commit_sha[:7] }}</span>
+          </div>
+
+          <!-- Branch -->
+          <div class="col-span-2">
+            <span class="text-xs text-f11-muted/60">{{ b.branch }}</span>
+          </div>
+
+          <!-- Message -->
+          <div class="col-span-4 min-w-0">
+            {% if b.commit_msg %}
+            <span class="text-xs text-f11-dim/60 truncate block">{{ b.commit_msg.strip()[:80] }}</span>
+            {% endif %}
+          </div>
+
+          <!-- Status -->
+          <div class="col-span-1">
+            <span class="text-[10px] font-semibold uppercase tracking-wider
+              {% if b.status == 'success' %}text-f11-success
+              {% elif b.status == 'failed' %}text-f11-danger
+              {% elif b.status == 'running' %}text-f11-warning
+              {% else %}text-f11-muted/30{% endif %}">
+              {{ b.status }}
+            </span>
+          </div>
+
+          <!-- Duration -->
+          <div class="col-span-1">
+            {% if b.started_at and b.finished_at %}
+            <span class="text-[10px] text-f11-muted/30">{{ (b.finished_at - b.started_at).total_seconds()|round(1) }}s</span>
+            {% endif %}
+          </div>
+
+          <!-- Actions -->
+          <div class="col-span-1 flex items-center gap-2 justify-end">
+            <a href="/builds/{{ b.id }}" class="text-[10px] text-f11-muted/30 hover:text-f11-dim transition-colors font-medium">Ver</a>
+            {% if b.status == 'running' %}
+            <form method="POST" action="/api/builds/{{ b.id }}/cancel" onsubmit="return confirm('¿Cancelar este build?')">
+              <button class="text-[10px] text-f11-danger/60 hover:text-f11-danger transition-colors font-medium">Cancelar</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+(function() {
+  var evtSource = new EventSource('/api/events');
+  evtSource.addEventListener('build_created', function(e) { setTimeout(function() { location.reload(); }, 2000); });
+  evtSource.addEventListener('build_started', function(e) { setTimeout(function() { location.reload(); }, 2000); });
+  evtSource.addEventListener('build_updated', function(e) { setTimeout(function() { location.reload(); }, 2000); });
+  evtSource.onerror = function() {};
+})();
+{% if running_builds %}
+setTimeout(function() { location.reload(); }, 8000);
+{% endif %}
+</script>
+{% endblock %}

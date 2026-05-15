@@ -625,6 +625,92 @@ async def api_stats():
         repos = session.execute(select(func.count(func.distinct(Build.repo)))).scalar() or 0
     return {"total": total, "success": success, "failed": failed, "running": running, "repos": repos}
 
+
+# ── Project page ──
+@app.get("/projects/{repo:path}", response_class=HTMLResponse)
+async def project_page(request: Request, repo: str):
+    user = _user_context(request)
+    with db() as session:
+        builds = session.execute(
+            select(Build).where(Build.repo == repo).order_by(Build.id.desc()).limit(50)
+        ).scalars().all()
+        config = session.execute(select(WhConfig).where(WhConfig.repo == repo)).scalar_one_or_none()
+
+    if not builds and not config:
+        return templates.TemplateResponse("error.html", {"request": request, "user": user, "code": 404, "msg": "Project not found"})
+
+    is_active = config is not None
+    total = len(builds)
+    running_builds = [b for b in builds if b.status == 'running']
+
+    return templates.TemplateResponse("project.html", {
+        "request": request, "user": user, "repo": repo,
+        "builds": builds, "total": total,
+        "is_active": is_active, "running_builds": running_builds,
+    })
+
+
+@app.post("/api/builds/{build_id}/cancel")
+async def cancel_build(build_id: int):
+    """Cancel a running build by killing its process."""
+    with db() as session:
+        build = session.get(Build, build_id)
+        if not build:
+            raise HTTPException(404, "Build not found")
+        if build.status != "running":
+            return {"status": "error", "msg": "Build is not running"}
+        build.status = "failed"
+        build.finished_at = datetime.now(timezone.utc)
+        build.log += f"\n[{datetime.now():%H:%M:%S}] 🛑 Build cancelled by user\n"
+        session.commit()
+
+    # Kill the docker build process
+    import signal
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "pkill", "-f", f"ci-.*:{build.commit_sha[:7]}",  # Kill by docker tag
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        await proc.communicate()
+    except:
+        pass
+
+    await sse_broadcast("build_updated", {
+        "id": build_id, "repo": build.repo,
+        "status": "failed", "finished_at": build.finished_at.isoformat(),
+    })
+    return {"status": "cancelled"}
+
+
+@app.post("/api/builds/trigger")
+async def trigger_build(request: Request, repo: str = Form(...), branch: str = Form("main"),
+                         commit_sha: str = Form(""), commit_msg: str = Form("Manual trigger")):
+    """Manually trigger a build for a repo."""
+    user = _user_context(request)
+    if not user:
+        return RedirectResponse(url="/auth/login")
+
+    with db() as session:
+        config = session.execute(select(WhConfig).where(WhConfig.repo == repo)).scalar_one_or_none()
+        if not config or not config.access_token:
+            return HTMLResponse("No token configured for this repo", status_code=400)
+
+        build = Build(repo=repo, branch=branch, commit_sha=commit_sha or "manual",
+                       commit_msg=commit_msg[:500], author=user.get("login", ""), status="pending",
+                       triggered_by="manual")
+        session.add(build)
+        session.commit()
+        build_id = build.id
+
+    asyncio.create_task(run_docker_build(build_id, repo, branch, commit_sha or "manual", config.access_token))
+
+    await sse_broadcast("build_created", {
+        "id": build_id, "repo": repo, "branch": branch,
+        "commit_sha": commit_sha or "manual", "status": "pending",
+    })
+
+    return RedirectResponse(url=f"/projects/{repo}", status_code=302)
+
+
 # ── Settings ──
 @app.get("/settings", response_class=HTMLResponse)
 async def settings_page(request: Request):
