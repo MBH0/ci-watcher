@@ -136,43 +136,7 @@
   </div>
 </div>
 
-<!-- Toast container -->
-<div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
-
 <script>
-// SSE + Toast notifications
-(function() {
-  var toastContainer = document.getElementById('toast-container');
-  var evtSource = new EventSource('/api/events');
-
-  function showToast(repo, eventType, status) {
-    var colors = { success: 'bg-f11-success/10 border-f11-success/20 text-f11-success', failed: 'bg-f11-danger/10 border-f11-danger/20 text-f11-danger', running: 'bg-f11-warning/10 border-f11-warning/20 text-f11-warning', pending: 'bg-f11-muted/10 border-f11-muted/20 text-f11-muted' };
-    var icons = { success: '✓', failed: '✗', running: '…', pending: '○' };
-    var labels = { build_created: 'Build creado', build_started: 'Build iniciado', build_updated: 'Build finalizado' };
-    var color = colors[status] || colors.pending;
-    var label = labels[eventType] || eventType;
-
-    var toast = document.createElement('div');
-    toast.className = 'pointer-events-auto flex items-center gap-3 px-5 py-3 rounded-xl border shadow-lg backdrop-blur-md translate-y-0 transition-all duration-300 ' + color;
-    toast.innerHTML = '<span class="text-sm font-bold">' + (icons[status] || '○') + '</span><div><p class="text-xs font-semibold">' + label + '</p><p class="text-[10px] opacity-70 truncate max-w-[250px]">' + repo + '</p></div>';
-
-    toastContainer.appendChild(toast);
-    setTimeout(function() { toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)'; }, 4000);
-    setTimeout(function() { if (toast.parentNode) toast.remove(); }, 4500);
-  }
-
-  evtSource.addEventListener('build_created', function(e) {
-    try { var d = JSON.parse(e.data); showToast(d.repo, 'build_created', d.status); reloadSoon(); } catch(e) {}
-  });
-  evtSource.addEventListener('build_started', function(e) {
-    try { var d = JSON.parse(e.data); showToast(d.repo, 'build_started', 'running'); reloadSoon(); } catch(e) {}
-  });
-  evtSource.addEventListener('build_updated', function(e) {
-    try { var d = JSON.parse(e.data); showToast(d.repo, 'build_updated', d.status); reloadSoon(); } catch(e) {}
-  });
-  evtSource.onerror = function() { console.log('SSE reconectando...'); };
-})();
-function reloadSoon() { setTimeout(function() { location.reload(); }, 2000); }
 {% if running_count > 0 %}
 setTimeout(function() { location.reload(); }, 10000);
 {% endif %}

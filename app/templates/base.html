@@ -54,5 +54,62 @@
   <main class="flex-1 min-w-0">
     {% block content %}{% endblock %}
   </main>
+
+  <!-- Global toast container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+  <!-- Global SSE + Toast notifications -->
+  <script>
+  (function() {
+    var container = document.getElementById('toast-container');
+    if (!container) return;
+    var evtSource = new EventSource('/api/events');
+
+    function showToast(repo, eventType, status) {
+      var colors = {
+        success: 'bg-f11-success/10 border-f11-success/20 text-f11-success',
+        failed: 'bg-f11-danger/10 border-f11-danger/20 text-f11-danger',
+        running: 'bg-f11-warning/10 border-f11-warning/20 text-f11-warning',
+        pending: 'bg-f11-muted/10 border-f11-muted/20 text-f11-muted'
+      };
+      var icons = { success: '✓', failed: '✗', running: '…', pending: '○' };
+      var labels = {
+        build_created: 'Build encolado',
+        build_started: 'Build iniciado',
+        build_updated: 'Build finalizado'
+      };
+      var color = colors[status] || colors.pending;
+      var label = labels[eventType] || eventType;
+
+      var toast = document.createElement('div');
+      toast.className = 'pointer-events-auto flex items-center gap-3 px-5 py-3.5 rounded-xl border shadow-lg backdrop-blur-md transition-all duration-300 ' + color;
+      toast.style.transform = 'translateX(120%)';
+      toast.style.opacity = '0';
+      toast.innerHTML = '<span class="text-sm font-bold">' + (icons[status] || '○') + '</span><div><p class="text-xs font-semibold">' + label + '</p><p class="text-[10px] opacity-70 truncate max-w-[260px]">' + repo + '</p></div>';
+
+      container.appendChild(toast);
+      requestAnimationFrame(function() {
+        toast.style.transform = 'translateX(0)';
+        toast.style.opacity = '1';
+      });
+      setTimeout(function() {
+        toast.style.transform = 'translateX(120%)';
+        toast.style.opacity = '0';
+      }, 4500);
+      setTimeout(function() { if (toast.parentNode) toast.remove(); }, 5000);
+    }
+
+    evtSource.addEventListener('build_created', function(e) {
+      try { var d = JSON.parse(e.data); showToast(d.repo, 'build_created', d.status); } catch(e) {}
+    });
+    evtSource.addEventListener('build_started', function(e) {
+      try { var d = JSON.parse(e.data); showToast(d.repo, 'build_started', 'running'); } catch(e) {}
+    });
+    evtSource.addEventListener('build_updated', function(e) {
+      try { var d = JSON.parse(e.data); showToast(d.repo, 'build_updated', d.status); } catch(e) {}
+    });
+    evtSource.onerror = function() {};
+  })();
+  </script>
 </body>
 </html>
