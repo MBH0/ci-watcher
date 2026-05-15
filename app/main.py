@@ -659,24 +659,27 @@ async def cancel_build(build_id: int):
             raise HTTPException(404, "Build not found")
         if build.status != "running":
             return {"status": "error", "msg": "Build is not running"}
+        # Extract values before session closes
+        repo = build.repo
+        sha = build.commit_sha[:7]
+        finished = datetime.now(timezone.utc)
         build.status = "failed"
-        build.finished_at = datetime.now(timezone.utc)
-        build.log += f"\n[{datetime.now():%H:%M:%S}] 🛑 Build cancelled by user\n"
+        build.finished_at = finished
+        build.log += f"\n[{finished.strftime('%H:%M:%S')}] 🛑 Build cancelled by user\n"
         session.commit()
 
     # Kill the docker build process
-    import signal
     try:
         proc = await asyncio.create_subprocess_exec(
-            "pkill", "-f", f"ci-.*:{build.commit_sha[:7]}",  # Kill by docker tag
+            "pkill", "-f", f"ci-.*:{sha}",
             stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         await proc.communicate()
     except:
         pass
 
     await sse_broadcast("build_updated", {
-        "id": build_id, "repo": build.repo,
-        "status": "failed", "finished_at": build.finished_at.isoformat(),
+        "id": build_id, "repo": repo,
+        "status": "failed", "finished_at": finished.isoformat(),
     })
     return {"status": "cancelled"}
 
