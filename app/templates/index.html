@@ -81,7 +81,7 @@
           <div class="flex items-center gap-3 shrink-0">
             {% set status_color = 'text-f11-success' if last.status == 'success' else 'text-f11-danger' if last.status == 'failed' else 'text-f11-warning' if last.status == 'running' else 'text-f11-muted/50' %}
             <span class="text-xs font-semibold {{ status_color }}">{{ last.status }}</span>
-            <span class="text-[10px] text-f11-muted/30 font-mono">{{ last.commit_sha[:7] }}</span>
+            <span class="text-xs font-mono text-white/40">{{ last.commit_sha[:7] }}</span>
             <svg class="w-4 h-4 text-f11-muted/20 group-hover:text-f11-muted/50 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
           </div>
         </a>
@@ -97,8 +97,8 @@
               {% else %}bg-f11-muted/30{% endif %}">
             </div>
             <div class="min-w-0 flex-1 flex items-center gap-3">
-              <span class="text-xs font-mono text-f11-muted/40 shrink-0 w-16">{{ b.commit_sha[:7] }}</span>
-              <span class="text-xs text-f11-muted/50 shrink-0">{{ b.branch }}</span>
+              <span class="text-xs font-mono text-white/50 shrink-0 w-16">{{ b.commit_sha[:7] }}</span>
+              <span class="text-xs text-white/50 shrink-0">{{ b.branch }}</span>
               {% if b.commit_msg %}
               <span class="text-xs font-medium text-white/60 truncate group-hover:text-white/80 transition-colors">{{ b.commit_msg.strip()[:70] }}</span>
               {% endif %}
@@ -112,7 +112,7 @@
                 {{ b.status }}
               </span>
               {% if b.finished_at %}
-              <span class="text-[10px] text-f11-muted/30">{{ b.finished_at.strftime('%H:%M') }}</span>
+              <span class="text-[10px] text-white/40">{{ b.finished_at.strftime('%H:%M') }}</span>
               {% endif %}
             </div>
           </a>

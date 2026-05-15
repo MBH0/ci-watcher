@@ -27,17 +27,17 @@
             {% endif %}
           </div>
           {% if repo.description %}
-          <p class="text-xs text-f11-muted/40 mt-1.5 truncate max-w-xl">{{ repo.description }}</p>
+          <p class="text-xs text-white/50 mt-1.5 truncate max-w-xl">{{ repo.description }}</p>
           {% endif %}
         </div>
         <div class="flex items-center gap-4 shrink-0 ml-6">
           {% if repo.language %}
-          <span class="text-[10px] text-f11-muted/30 bg-white/[0.03] px-2.5 py-1.5 rounded-lg font-medium">{{ repo.language }}</span>
+          <span class="text-xs text-white/40 bg-white/[0.04] px-3 py-1.5 rounded-lg font-medium">{{ repo.language }}</span>
           {% endif %}
           {% if is_active %}
           <form method="POST" action="/repos/deactivate">
             <input type="hidden" name="repo" value="{{ full }}">
-            <button class="text-xs text-f11-muted/40 hover:text-f11-danger px-4 py-2 rounded-xl hover:bg-f11-danger/5 transition-all font-medium">Desactivar</button>
+            <button class="text-xs text-white/50 hover:text-f11-danger px-4 py-2 rounded-xl hover:bg-f11-danger/10 transition-all font-medium">Desactivar</button>
           </form>
           {% else %}
           <form method="POST" action="/repos/activate">
