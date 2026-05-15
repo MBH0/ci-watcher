@@ -135,8 +135,8 @@ async function cancelBuild(id, btn) {
       setTimeout(function() { location.reload(); }, 1000);
     } else {
       showToastMsg(d.msg || 'No se pudo cancelar', 'failed');
-      btn.disabled = false;
-      btn.textContent = 'Cancelar';
+      // Build already in terminal state — refresh to sync UI
+      setTimeout(function() { location.reload(); }, 2000);
     }
   } catch(e) {
     showToastMsg('Error al cancelar', 'failed');
