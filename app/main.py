@@ -696,6 +696,7 @@ async def trigger_build(request: Request, repo: str = Form(...), branch: str = F
         config = session.execute(select(WhConfig).where(WhConfig.repo == repo)).scalar_one_or_none()
         if not config or not config.access_token:
             return HTMLResponse("No token configured for this repo", status_code=400)
+        access_token = config.access_token  # extract before session closes
 
         build = Build(repo=repo, branch=branch, commit_sha=commit_sha or "manual",
                        commit_msg=commit_msg[:500], author=user.get("login", ""), status="pending",
@@ -704,7 +705,7 @@ async def trigger_build(request: Request, repo: str = Form(...), branch: str = F
         session.commit()
         build_id = build.id
 
-    asyncio.create_task(run_docker_build(build_id, repo, branch, commit_sha or "manual", config.access_token))
+    asyncio.create_task(run_docker_build(build_id, repo, branch, commit_sha or "manual", access_token))
 
     await sse_broadcast("build_created", {
         "id": build_id, "repo": repo, "branch": branch,
