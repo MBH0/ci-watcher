@@ -3,12 +3,14 @@ services:
     build: .
     container_name: ci-watcher
     restart: unless-stopped
-    ports:
-      - "8008:8008"
+    expose:
+      - "8008"
     volumes:
-      - ci_watcher_data:/data
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/ci-builds:/tmp/ci-builds
+      - ci_watcher_data:/data:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /tmp/ci-builds:/tmp/ci-builds:rw
+    networks:
+      - proxy_npm
     environment:
       - DATA_DIR=/data
     env_file:
@@ -16,3 +18,7 @@ services:
 
 volumes:
   ci_watcher_data:
+
+networks:
+  proxy_npm:
+    external: true
