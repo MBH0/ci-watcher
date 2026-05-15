@@ -481,21 +481,31 @@ def _user_context(request: Request):
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     user = _user_context(request)
-    page = int(request.query_params.get("page", 1))
-    per_page = 25
     with db() as session:
-        total = session.execute(select(func.count(Build.id))).scalar() or 0
-        builds = session.execute(
-            select(Build).order_by(Build.id.desc()).offset((page-1)*per_page).limit(per_page)
+        rows = session.execute(
+            select(Build).order_by(Build.id.desc()).limit(200)
         ).scalars().all()
-        # Get configured repos
         repos = session.execute(select(WhConfig)).scalars().all()
+
     configured_repos = {r.repo for r in repos}
-    total_pages = max(1, (total + per_page - 1) // per_page)
+
+    from collections import OrderedDict
+    grouped = OrderedDict()
+    for b in rows:
+        repo = b.repo
+        if repo not in grouped:
+            grouped[repo] = []
+        grouped[repo].append(b)
+
+    total = len(rows)
+    success = sum(1 for b in rows if b.status == 'success')
+    failed = sum(1 for b in rows if b.status == 'failed')
+    running = sum(1 for b in rows if b.status == 'running')
 
     return templates.TemplateResponse("index.html", {
-        "request": request, "user": user, "builds": builds,
-        "page": page, "total_pages": total_pages, "total_builds": total,
+        "request": request, "user": user,
+        "grouped": grouped, "total_builds": total,
+        "success_count": success, "failed_count": failed, "running_count": running,
         "configured_repos": configured_repos,
     })
 
