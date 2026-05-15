@@ -14,8 +14,12 @@ services:
     environment:
       - DATA_DIR=/data
       - HOST_URL=${SERVICE_URL_CI_WATCHER:-${COOLIFY_URL:-http://localhost:8008}}
-    env_file:
-      - .env
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID:-}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET:-}
+      - JWT_SECRET=${JWT_SECRET:-change-me}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-change-me}
+      - ALLOWED_USERS=${ALLOWED_USERS:-}
+      - BUILD_DIR=${BUILD_DIR:-/tmp/ci-builds}
 
 volumes:
   ci_watcher_data:
