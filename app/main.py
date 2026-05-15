@@ -321,7 +321,7 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
             wlog("✅ Build recorded (no Docker image)")
             status = "success"
         else:
-            docker_tag = f"ci-{repo_short}:{commit_sha[:7] or 'latest'}"
+            docker_tag = f"ci-{repo_short.lower()}:{commit_sha[:7] or 'latest'}"
             ctx = os.path.dirname(p)
             wlog(f"🐳 Building Docker image: {docker_tag}")
             wlog(f"   Dockerfile: {p}")
