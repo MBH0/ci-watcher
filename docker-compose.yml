@@ -13,6 +13,7 @@ services:
       - proxy_npm
     environment:
       - DATA_DIR=/data
+      - HOST_URL=${SERVICE_URL_CI_WATCHER:-${COOLIFY_URL:-http://localhost:8008}}
     env_file:
       - .env
 
