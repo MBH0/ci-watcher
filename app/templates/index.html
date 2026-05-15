@@ -50,6 +50,7 @@
     <div class="space-y-6">
       {% for repo, builds in grouped.items() %}
       {% set repo_short = repo.split('/')[-1] %}
+      {% set last = builds[0] %}
       <div class="card-solid overflow-hidden">
         <!-- Repo header (clickable → project page) -->
         <a href="/projects/{{ repo }}" class="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] hover:bg-white/[0.02] transition-colors group">
