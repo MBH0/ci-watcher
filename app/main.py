@@ -349,20 +349,20 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
             wlog(f"❌ Error: {e}")
             status = "failed"
 
+    finished_at = datetime.now(timezone.utc)
     with db() as session:
         build = session.get(Build, build_id)
         if build:
             build.status = status
-            build.finished_at = datetime.now(timezone.utc)
+            build.finished_at = finished_at
             build.log = full_log
             session.commit()
 
-    # Broadcast completion via SSE
     await sse_broadcast("build_updated", {
         "id": build_id,
         "repo": repo,
         "status": status,
-        "finished_at": build.finished_at.isoformat() if build.finished_at else None,
+        "finished_at": finished_at.isoformat(),
     })
 
 # ── Webhook endpoints ──
@@ -657,15 +657,6 @@ async def cancel_build(build_id: int):
             raise HTTPException(404, "Build not found")
         if build.status not in ("running", "pending"):
             return {"status": "error", "msg": f"Build ya está {build.status} (no se puede cancelar)"}
-        # Extract values before session closes
-        repo = build.repo
-        sha = build.commit_sha[:7]
-        finished = datetime.now(timezone.utc)
-        build.status = "failed"
-        build.finished_at = finished
-        build.log += f"\n[{finished.strftime('%H:%M:%S')}] 🛑 Build cancelled by user\n"
-        session.commit()
-        # Extract values before session closes
         repo = build.repo
         sha = build.commit_sha[:7]
         finished = datetime.now(timezone.utc)
