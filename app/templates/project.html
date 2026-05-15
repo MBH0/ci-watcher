@@ -3,7 +3,7 @@
 {% block content %}
 <div class="p-10 lg:p-12">
   <div class="max-w-6xl mx-auto">
-    <a href="/" class="inline-flex items-center gap-2 text-f11-muted/40 hover:text-f11-dim transition-colors mb-8 text-sm font-medium">
+    <a href="/" class="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-8 text-sm font-medium">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
       Volver
     </a>
@@ -109,7 +109,7 @@
 
           <!-- Actions -->
           <div class="col-span-1 flex items-center gap-2 justify-end">
-            <a href="/builds/{{ b.id }}" class="text-[10px] text-f11-muted/30 hover:text-f11-dim transition-colors font-medium">Ver</a>
+            <a href="/builds/{{ b.id }}" class="text-xs text-f11-accent/80 hover:text-f11-accent transition-colors font-semibold">Ver</a>
             {% if b.status == 'running' %}
             <button onclick="cancelBuild({{ b.id }}, this)" class="text-[10px] text-f11-danger/60 hover:text-f11-danger transition-colors font-medium">Cancelar</button>
             {% endif %}

@@ -3,7 +3,7 @@
 {% block content %}
 <div class="p-10 lg:p-12">
   <div class="max-w-6xl mx-auto">
-    <a href="/" class="inline-flex items-center gap-2 text-f11-muted/40 hover:text-f11-dim transition-colors mb-8 text-sm font-medium">
+    <a href="/" class="inline-flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-8 text-sm font-medium">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
       Volver
     </a>
@@ -30,7 +30,7 @@
           <h1 class="text-2xl font-bold text-white tracking-tight">{{ build.repo }}</h1>
           <span class="text-f11-muted/30 text-xs font-mono bg-white/[0.03] px-2.5 py-1 rounded-md">{{ build.commit_sha[:7] }}</span>
         </div>
-        <div class="flex flex-wrap items-center gap-4 text-sm text-f11-muted/50">
+        <div class="flex flex-wrap items-center gap-4 text-sm text-white/60">
           <span class="flex items-center gap-1.5">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><polyline points="9 15 12 12 15 15"/></svg>
             {{ build.branch }}
@@ -42,13 +42,13 @@
           </span>
           {% endif %}
           {% if build.triggered_by %}
-          <span>via {{ build.triggered_by }}</span>
+          <span class="text-white/40">via {{ build.triggered_by }}</span>
           {% endif %}
         </div>
         {% if build.commit_msg %}
-        <p class="text-sm text-f11-muted/60 mt-3 max-w-2xl leading-relaxed border-l-2 border-white/[0.06] pl-4">{{ build.commit_msg.strip() }}</p>
+        <p class="text-sm text-white/70 mt-3 max-w-2xl leading-relaxed border-l-2 border-white/10 pl-4">{{ build.commit_msg.strip() }}</p>
         {% endif %}
-        <div class="flex items-center gap-6 mt-4 text-xs text-f11-muted/40">
+        <div class="flex items-center gap-6 mt-4 text-xs text-white/40">
           {% if build.started_at %}
           <span>Inicio: {{ build.started_at.strftime('%d/%m/%Y %H:%M:%S') }}</span>
           {% endif %}

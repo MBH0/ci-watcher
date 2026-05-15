@@ -100,7 +100,7 @@
               <span class="text-xs font-mono text-f11-muted/40 shrink-0 w-16">{{ b.commit_sha[:7] }}</span>
               <span class="text-xs text-f11-muted/50 shrink-0">{{ b.branch }}</span>
               {% if b.commit_msg %}
-              <span class="text-xs text-f11-dim/60 truncate group-hover:text-f11-dim transition-colors">{{ b.commit_msg.strip()[:70] }}</span>
+              <span class="text-xs font-medium text-white/60 truncate group-hover:text-white/80 transition-colors">{{ b.commit_msg.strip()[:70] }}</span>
               {% endif %}
             </div>
             <div class="flex items-center gap-3 shrink-0">
