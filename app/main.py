@@ -276,7 +276,7 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
 
         if os.path.exists(workdir):
             proc = await asyncio.create_subprocess_exec(
-                "git", "-C", workdir, "pull", "origin", branch or "main",
+                "git", "-C", workdir, "fetch", "--depth", "1", "origin", branch or "main",
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
                 env={**os.environ, "GIT_TERMINAL_PROMPT": "0"})
         else:
