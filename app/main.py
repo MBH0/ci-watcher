@@ -283,7 +283,7 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
             wlog(f"❌ Git failed (rc={proc.returncode})"); status = "failed"
             raise Exception("git_error")
 
-        if commit_sha and commit_sha != "0000000000000000000000000000000000000000":
+        if commit_sha and commit_sha not in ("0000000000000000000000000000000000000000", "manual"):
             proc = await asyncio.create_subprocess_exec(
                 "git", "-C", workdir, "checkout", commit_sha,
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT)
