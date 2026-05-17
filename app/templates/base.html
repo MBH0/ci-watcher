@@ -108,7 +108,11 @@
     evtSource.addEventListener('build_updated', function(e) {
       try { var d = JSON.parse(e.data); showToast(d.repo, 'build_updated', d.status); } catch(e) {}
     });
-    evtSource.onerror = function() {};
+    evtSource.onerror = function(e) {
+      if (evtSource.readyState === EventSource.CLOSED) {
+        console.warn('[SSE] disconnected, will retry in 3s');
+      }
+    };
   })();
   </script>
 </body>

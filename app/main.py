@@ -118,28 +118,20 @@ app = FastAPI(title="CI Watcher")
 
 # ── SSE subscribers ──
 _sse_subscribers: list[AsyncIOQueue] = []
+_sse_lock = asyncio.Lock()
 
 async def sse_broadcast(event: str, data: dict):
     """Push event to all connected SSE clients."""
     msg = f"event: {event}\ndata: {json.dumps(data)}\nretry: 3000\n\n"
-    dead = []
-    for queue in _sse_subscribers:
-        try:
-            await queue.put(msg)
-        except Exception:
-            dead.append(queue)
-    for q in dead:
-        _sse_subscribers.remove(q)
-
-async def sse_cleanup(queue: AsyncIOQueue):
-    """Remove subscriber on disconnect."""
-    try:
-        await queue.get()
-    except:
-        pass
-    finally:
-        if queue in _sse_subscribers:
-            _sse_subscribers.remove(queue)
+    async with _sse_lock:
+        dead = []
+        for queue in list(_sse_subscribers):
+            try:
+                await queue.put(msg)
+            except Exception:
+                dead.append(queue)
+        for q in dead:
+            _sse_subscribers.remove(q)
 
 @app.on_event("startup")
 async def startup():
@@ -375,17 +367,19 @@ async def sse_events(request: Request):
     async def event_stream():
         try:
             while True:
-                # Wait for message with 30s timeout for keepalive
                 try:
                     msg = await asyncio.wait_for(queue.get(), timeout=30)
                     yield msg
                 except asyncio.TimeoutError:
                     yield ": keepalive\n\n"
+        except (asyncio.CancelledError, GeneratorExit):
+            pass
         except Exception:
             pass
         finally:
-            if queue in _sse_subscribers:
-                _sse_subscribers.remove(queue)
+            async with _sse_lock:
+                if queue in _sse_subscribers:
+                    _sse_subscribers.remove(queue)
 
     return StreamingResponse(
         event_stream(),
