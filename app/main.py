@@ -296,43 +296,33 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
             out, _ = await proc.communicate()
             if out: wlog(out.decode().strip())
 
-        # Find Dockerfile — priority: Dockerfile > subdir Dockerfile > docker-compose.yml
+        # Find build file — priority: docker-compose > Dockerfile
         import glob
-        p = ""
-        for candidate in [
-            os.path.join(workdir, "Dockerfile"),
-            os.path.join(workdir, "apps", "frontend", "Dockerfile"),
-        ]:
-            if os.path.exists(candidate):
-                p = candidate
+        compose_candidates = [
+            os.path.join(workdir, "infra", "docker-compose.yml"),
+            os.path.join(workdir, "infra", "docker-compose.yaml"),
+            os.path.join(workdir, "docker-compose.yml"),
+            os.path.join(workdir, "docker-compose.yaml"),
+        ]
+        compose_file = ""
+        for c in compose_candidates:
+            if os.path.exists(c):
+                compose_file = c
                 break
-        if not p:
-            found = sorted(glob.glob(os.path.join(workdir, "**", "Dockerfile"), recursive=True),
-                          key=lambda x: len(x))
-            if found:
-                p = found[0]
-        if not p and os.path.exists(os.path.join(workdir, "docker-compose.yml")):
-            p = os.path.join(workdir, "docker-compose.yml")
 
-        if not os.path.exists(p):
-            wlog("⚠️ No Dockerfile found — skipping docker build")
-            wlog("✅ Build recorded (no Docker image)")
-            status = "success"
-        else:
-            docker_tag = f"ci-{repo_short.lower()}:{commit_sha[:7] or 'latest'}"
-            ctx = os.path.dirname(p)
-            wlog(f"🐳 Building Docker image: {docker_tag}")
-            wlog(f"   Dockerfile: {p}")
-
+        if compose_file:
+            wlog(f"🐳 Building all services via docker compose")
+            wlog(f"   Compose file: {compose_file}")
             proc = await asyncio.create_subprocess_exec(
-                "docker", "build", "-f", p, "-t", docker_tag, ctx,
-                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT)
+                "docker", "compose", "-f", compose_file, "build",
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
+                cwd=os.path.dirname(compose_file))
             try:
                 out, _ = await asyncio.wait_for(proc.communicate(), timeout=600)
                 if out:
                     wlog(out.decode().strip())
                 if proc.returncode == 0:
-                    wlog(f"✅ Build SUCCESS → {docker_tag}")
+                    wlog(f"✅ Build SUCCESS (docker compose)")
                     status = "success"
                 else:
                     wlog(f"❌ Build FAILED (rc={proc.returncode})")
@@ -341,6 +331,49 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
                 proc.kill()
                 wlog("❌ Build timed out after 600s")
                 status = "failed"
+        else:
+            # Fallback: single Dockerfile
+            p = ""
+            for candidate in [
+                os.path.join(workdir, "Dockerfile"),
+                os.path.join(workdir, "apps", "frontend", "Dockerfile"),
+            ]:
+                if os.path.exists(candidate):
+                    p = candidate
+                    break
+            if not p:
+                found = sorted(glob.glob(os.path.join(workdir, "**", "Dockerfile"), recursive=True),
+                              key=lambda x: len(x))
+                if found:
+                    p = found[0]
+
+            if not os.path.exists(p):
+                wlog("⚠️ No Dockerfile or docker-compose.yml found — skipping docker build")
+                wlog("✅ Build recorded (no Docker image)")
+                status = "success"
+            else:
+                docker_tag = f"ci-{repo_short.lower()}:{commit_sha[:7] or 'latest'}"
+                ctx = os.path.dirname(p)
+                wlog(f"🐳 Building Docker image: {docker_tag}")
+                wlog(f"   Dockerfile: {p}")
+
+                proc = await asyncio.create_subprocess_exec(
+                    "docker", "build", "-f", p, "-t", docker_tag, ctx,
+                    stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT)
+                try:
+                    out, _ = await asyncio.wait_for(proc.communicate(), timeout=600)
+                    if out:
+                        wlog(out.decode().strip())
+                    if proc.returncode == 0:
+                        wlog(f"✅ Build SUCCESS → {docker_tag}")
+                        status = "success"
+                    else:
+                        wlog(f"❌ Build FAILED (rc={proc.returncode})")
+                        status = "failed"
+                except asyncio.TimeoutError:
+                    proc.kill()
+                    wlog("❌ Build timed out after 600s")
+                    status = "failed"
 
     except Exception as e:
         if str(e) != "git_error":
