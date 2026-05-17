@@ -316,7 +316,7 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
             proc = await asyncio.create_subprocess_exec(
                 "docker", "compose", "-f", compose_file, "build",
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
-                cwd=os.path.dirname(compose_file))
+                cwd=workdir)
             try:
                 out, _ = await asyncio.wait_for(proc.communicate(), timeout=600)
                 if out:
