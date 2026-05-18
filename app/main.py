@@ -275,11 +275,13 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
         wlog(f"📦 Cloning {repo} @ {branch}")
 
         if os.path.exists(workdir):
+            wlog(f"🔧 $ git -C {workdir} fetch --depth 1 origin {branch or 'main'}")
             proc = await asyncio.create_subprocess_exec(
                 "git", "-C", workdir, "fetch", "--depth", "1", "origin", branch or "main",
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
                 env={**os.environ, "GIT_TERMINAL_PROMPT": "0"})
         else:
+            wlog(f"🔧 $ git clone --depth 1 --branch {branch or 'main'} {repo_url} {workdir}")
             proc = await asyncio.create_subprocess_exec(
                 "git", "clone", "--depth", "1", "--branch", branch or "main", repo_url, workdir,
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
@@ -292,12 +294,14 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
             raise Exception("git_error")
 
         if commit_sha not in ("", "0000000000000000000000000000000000000000", "manual"):
+            wlog(f"🔧 $ git -C {workdir} checkout {commit_sha}")
             proc = await asyncio.create_subprocess_exec(
                 "git", "-C", workdir, "checkout", commit_sha,
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT)
             out, _ = await proc.communicate()
             if out: wlog(out.decode().strip())
         elif commit_sha in ("manual", "") and branch:
+            wlog(f"🔧 $ git -C {workdir} checkout origin/{branch}")
             proc = await asyncio.create_subprocess_exec(
                 "git", "-C", workdir, "checkout", f"origin/{branch}",
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT)
@@ -321,6 +325,7 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
         if compose_file:
             wlog(f"🐳 Building all services via docker compose")
             wlog(f"   Compose file: {compose_file}")
+            wlog(f"🔧 $ docker compose -f {compose_file} --project-directory {workdir} build")
             proc = await asyncio.create_subprocess_exec(
                 "docker", "compose", "-f", compose_file, "--project-directory", workdir, "build",
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
@@ -364,6 +369,7 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
                 ctx = os.path.dirname(p)
                 wlog(f"🐳 Building Docker image: {docker_tag}")
                 wlog(f"   Dockerfile: {p}")
+                wlog(f"🔧 $ docker build -f {p} -t {docker_tag} {ctx}")
 
                 proc = await asyncio.create_subprocess_exec(
                     "docker", "build", "-f", p, "-t", docker_tag, ctx,
