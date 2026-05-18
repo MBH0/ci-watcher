@@ -322,7 +322,7 @@ async def run_docker_build(build_id: int, repo: str, branch: str, commit_sha: st
             wlog(f"🐳 Building all services via docker compose")
             wlog(f"   Compose file: {compose_file}")
             proc = await asyncio.create_subprocess_exec(
-                "docker", "compose", "-f", compose_file, "build",
+                "docker", "compose", "-f", compose_file, "--project-directory", workdir, "build",
                 stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT,
                 cwd=workdir)
             try:
