@@ -49,6 +49,7 @@ class WhConfig(Base):
     repo = Column(String(200), unique=True)
     access_token = Column(String(200))
     webhook_id = Column(Integer, nullable=True)
+    watched_branch = Column(String(100), default="main")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Build(Base):
@@ -135,6 +136,13 @@ async def sse_broadcast(event: str, data: dict):
 
 @app.on_event("startup")
 async def startup():
+    # Migrate DB: add watched_branch if missing
+    with db() as session:
+        try:
+            session.execute(text("SELECT watched_branch FROM wh_configs LIMIT 0"))
+        except Exception:
+            session.execute(text("ALTER TABLE wh_configs ADD COLUMN watched_branch VARCHAR(100) DEFAULT 'main'"))
+            session.commit()
     reload_settings()
     print(f"[CI Watcher] Settings loaded. Host: {HOST_URL}")
 
@@ -460,6 +468,14 @@ async def webhook_receiver(request: Request):
     if not repo_full:
         return {"error": "no repo"}
 
+    # Check watched branch filter
+    with db() as session:
+        config = session.execute(select(WhConfig).where(WhConfig.repo == repo_full)).scalar_one_or_none()
+
+    watched = (config.watched_branch or "main") if config else "main"
+    if branch != watched:
+        return {"msg": f"ignored: branch '{branch}' != watched '{watched}'"}
+
     with db() as session:
         build = Build(repo=repo_full, branch=branch, commit_sha=commit_sha[:40],
                        commit_msg=commit_msg[:500], author=author[:100], status="pending")
@@ -559,7 +575,7 @@ async def repos_page(request: Request):
     })
 
 @app.post("/repos/activate")
-async def activate_webhook(request: Request, repo: str = Form(...)):
+async def activate_webhook(request: Request, repo: str = Form(...), branch: str = Form("main")):
     user = _user_context(request)
     if not user:
         return RedirectResponse(url="/auth/login")
@@ -588,9 +604,10 @@ async def activate_webhook(request: Request, repo: str = Form(...)):
         existing = session.execute(select(WhConfig).where(WhConfig.repo == repo)).scalar_one_or_none()
         if existing:
             existing.access_token = user["access_token"]
+            existing.watched_branch = branch
             if created_id: existing.webhook_id = created_id
         else:
-            session.add(WhConfig(repo=repo, access_token=user["access_token"], webhook_id=created_id))
+            session.add(WhConfig(repo=repo, access_token=user["access_token"], webhook_id=created_id, watched_branch=branch))
         session.commit()
 
     return RedirectResponse(url="/repos", status_code=302)
