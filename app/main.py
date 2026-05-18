@@ -19,7 +19,7 @@ from fastapi import FastAPI, Request, HTTPException, Response, Form, Cookie
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, JSON, select, func, delete
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, JSON, select, func, delete, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 # ── Config ──
